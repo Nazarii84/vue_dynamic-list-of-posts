@@ -24,7 +24,7 @@ Simple Vue 3 + TypeScript application for managing posts and comments.
 - Delete comment
 - Sidebar layout with responsive behavior
 
-## 📦 Installation
+## Installation
 
 ```bash
 npm install
