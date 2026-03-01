@@ -50,6 +50,7 @@ const {
   openCreate,
   openPost,
   openEdit,
+  viewPost,
   closeSidebar,
 } = useSidebar();
 
@@ -68,16 +69,16 @@ onMounted(() => {
   loadPosts();
 });
 
+function resetSidebarErrors() {
+  resetPostDeleteState();
+  resetCommentDeleteState();
+}
+
 function handleCloseSidebar() {
   closeSidebar();
   clearComments();
   resetCommentFormUI();
   resetSidebarErrors();
-}
-
-function resetSidebarErrors() {
-  resetPostDeleteState();
-  resetCommentDeleteState();
 }
 
 function handleOpenCreate() {
@@ -106,16 +107,23 @@ function handleOpenEdit() {
   resetSidebarErrors();
 }
 
+function handleCancelEdit() {
+  if (!selectedPost.value) {
+    handleCloseSidebar();
+    return;
+  }
+
+  viewPost(selectedPost.value);
+}
+
 function onPostCreated(newPost: Post) {
   posts.value.push(newPost);
-  sidebarMode.value = "view";
-  selectedPost.value = newPost;
+  viewPost(newPost);
 }
 
 function onPostUpdated(updated: Post) {
   posts.value = posts.value.map((p) => (p.id === updated.id ? updated : p));
-  selectedPost.value = updated;
-  sidebarMode.value = "view";
+  viewPost(updated);
 }
 
 const {
@@ -149,27 +157,15 @@ function logout() {
 </script>
 
 <template>
-  <AppHeader
-    :user="user"
-    @logout="logout"
-  />
+  <AppHeader :user="user" @logout="logout" />
 
   <div class="container is-fluid py-5">
-    <div
-      v-if="!user"
-      class="notification is-warning"
-    >
+    <div v-if="!user" class="notification is-warning">
       Ви вийшли з акаунта. Увійдіть знову, щоб побачити пости.
     </div>
 
-    <div
-      v-else
-      class="columns"
-    >
-      <div
-        class="column"
-        :class="isSidebarOpen ? 'is-7' : 'is-12'"
-      >
+    <div v-else class="columns">
+      <div class="column" :class="isSidebarOpen ? 'is-7' : 'is-12'">
         <PostsList
           :posts="posts"
           :is-loading="isLoading"
@@ -181,23 +177,15 @@ function logout() {
         />
       </div>
 
-      <div
-        v-if="isSidebarOpen"
-        class="column is-5"
-      >
+      <div v-if="isSidebarOpen" class="column is-5">
         <SidebarLayout :is-open="isSidebarOpen">
           <div class="level">
             <div class="level-left">
-              <h2 class="title is-4 mb-0">
-                Sidebar
-              </h2>
+              <h2 class="title is-4 mb-0">Sidebar</h2>
             </div>
           </div>
 
-          <div
-            v-if="sidebarMode === 'none'"
-            class="has-text-grey"
-          >
+          <div v-if="sidebarMode === 'none'" class="has-text-grey">
             Виберіть пост або натисніть Create new post
           </div>
 
@@ -218,7 +206,7 @@ function logout() {
               :initial-title="selectedPost.title"
               :initial-body="selectedPost.body"
               @updated="onPostUpdated"
-              @cancel="sidebarMode = 'view'"
+              @cancel="handleCancelEdit"
             />
           </div>
 
@@ -230,16 +218,11 @@ function logout() {
               @delete="handleDeletePost"
             />
 
-            <p
-              v-if="deletePostError"
-              class="help is-danger mt-2"
-            >
+            <p v-if="deletePostError" class="help is-danger mt-2">
               {{ deletePostError }}
             </p>
 
-            <h4 class="title is-5 mt-5">
-              Коментарі
-            </h4>
+            <h4 class="title is-5 mt-5">Коментарі</h4>
 
             <div
               v-if="commentsLoading"
@@ -248,21 +231,14 @@ function logout() {
               <Loader />
             </div>
 
-            <div
-              v-else-if="commentsError"
-              class="notification is-danger"
-            >
+            <div v-else-if="commentsError" class="notification is-danger">
               CommentsError: {{ commentsError }}
             </div>
 
             <NoCommentsYet v-else-if="comments.length === 0" />
 
             <div v-else>
-              <div
-                v-for="c in comments"
-                :key="c.id"
-                class="mb-3"
-              >
+              <div v-for="c in comments" :key="c.id" class="mb-3">
                 <CommentItem
                   :comment="c"
                   :is-deleting="deletingCommentIds.includes(c.id)"
@@ -271,10 +247,7 @@ function logout() {
               </div>
             </div>
 
-            <div
-              v-if="deleteCommentError"
-              class="notification is-danger mt-3"
-            >
+            <div v-if="deleteCommentError" class="notification is-danger mt-3">
               <p class="mb-2">
                 {{ deleteCommentError }}
               </p>
@@ -306,10 +279,7 @@ function logout() {
             />
           </div>
 
-          <div
-            v-else
-            class="notification is-danger"
-          >
+          <div v-else class="notification is-danger">
             Selected post is missing
           </div>
         </SidebarLayout>

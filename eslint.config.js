@@ -9,6 +9,13 @@ export default [
   ...vue.configs["flat/recommended"],
 
   {
+    rules: {
+      "vue/max-attributes-per-line": "off",
+      "vue/singleline-html-element-content-newline": "off",
+    },
+  },
+
+  {
     files: ["**/*.vue"],
     languageOptions: {
       parser: vueParser,

@@ -38,6 +38,11 @@ export function useSidebar() {
     sidebarMode.value = "none";
   }
 
+  function viewPost(post: Post) {
+    selectedPost.value = post;
+    sidebarMode.value = "view";
+  }
+
   return {
     sidebarMode,
     selectedPost,
@@ -46,6 +51,7 @@ export function useSidebar() {
     openCreate,
     openPost,
     openEdit,
+    viewPost,
     closeSidebar,
   };
 }

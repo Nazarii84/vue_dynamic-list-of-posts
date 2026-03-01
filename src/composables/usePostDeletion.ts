@@ -7,7 +7,8 @@ export function usePostDeletion(params: {
   onAfterOptimisticDelete: () => void;
   deletePostApi: (postId: number) => Promise<unknown>;
 }) {
-  const { posts, selectedPost, onAfterOptimisticDelete, deletePostApi } = params;
+  const { posts, selectedPost, onAfterOptimisticDelete, deletePostApi } =
+    params;
 
   const isDeletingPost = ref(false);
   const deletePostError = ref<string | null>(null);
@@ -23,10 +24,10 @@ export function usePostDeletion(params: {
     const prevPosts = posts.value;
     posts.value = posts.value.filter((p) => p.id !== idToDelete);
 
-    onAfterOptimisticDelete();
-
     try {
       await deletePostApi(idToDelete);
+
+      onAfterOptimisticDelete();
     } catch (e) {
       posts.value = prevPosts;
       deletePostError.value =

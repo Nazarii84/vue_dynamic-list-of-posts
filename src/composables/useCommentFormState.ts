@@ -29,7 +29,6 @@ export function useCommentFormState(params: { comments: Ref<PostComment[]> }) {
 
   function onCommentSubmitted(newComment: PostComment) {
     comments.value.push(newComment);
-    isCommentFormVisible.value = false;
   }
 
   return {
